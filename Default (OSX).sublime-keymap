@@ -1,0 +1,5 @@
+[
+	{"keys": ["super+shift+t"], "command": "xdebug"},
+	{"keys": ["super+shift+b"], "command": "xdebug_breakpoint"},
+	{"keys": ["super+shift+r"], "command": "xdebug_continue" }
+]
