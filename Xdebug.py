@@ -232,6 +232,14 @@ class XdebugView(object):
 	def rows(self, lines):
 		if not type(lines)==types.ListType: lines = [lines]
 		return [self.view.rowcol(line.begin())[0] + 1 for line in lines]
+	def append(self, content, edit = None, end=False):
+		if not edit:
+			edit = self.view.begin_edit()
+			end = True
+		self.view.insert(edit, self.view.size(), content + "\n")
+		if end:
+			self.view.end_edit(edit)
+		return edit
 
 class XdebugCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
