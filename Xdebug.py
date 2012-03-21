@@ -207,7 +207,7 @@ class XdebugView(object):
 		for row in self.breaks:
 			protocol.send('breakpoint_set', t='line', f=uri, n=row)
 			res = protocol.read().firstChild
-			self.breaks[line]['id'] = res.getAttribute('id')
+			self.breaks[row]['id'] = res.getAttribute('id')
 
 	def uri(self):
 		return 'file://' + self.view.file_name()
