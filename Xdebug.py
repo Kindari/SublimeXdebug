@@ -356,7 +356,7 @@ class XdebugStatus(sublime_plugin.TextCommand):
 	def run(self, edit):
 		protocol.send('status')
 		res = protocol.read().firstChild
-		sublime.set_status( res.getAttribute('reason') + ': ' + res.getAttribute('status') )
+		sublime.status_message( res.getAttribute('reason') + ': ' + res.getAttribute('status') )
 
 	def is_enabled(self):
 		if protocol and protocol.connected:
