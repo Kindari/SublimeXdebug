@@ -252,6 +252,7 @@ class XdebugCommand(sublime_plugin.TextCommand):
 				mapping.update( {
 					'xdebug_continue'	: 'Continue',
 					'xdebug_status'		: 'Status',
+					'xdebug_execute'	: 'Execute',
 				})
 		else:
 			mapping['xdebug_listen'] = 'Listen'
@@ -362,6 +363,35 @@ class XdebugStatus(sublime_plugin.TextCommand):
 		if protocol and protocol.connected:
 			return True
 		return False
+
+class XdebugExecute(sublime_plugin.TextCommand):
+	def run(self, edit):
+		self.view.window().show_input_panel( 'Xdebug Execute', '',
+			self.on_done, self.on_change, self.on_cancel)
+	def is_enabled(self):
+		if protocol and protocol.connected:
+			return True
+		return False
+	def on_done(self, line):
+		if ' ' in line:
+			command, args = line.split(' ', 1)
+		else:
+			command, args = line, ''
+		protocol.send(command, args)
+		res = protocol.read().firstChild
+
+		window = self.view.window()
+		output = window.get_output_panel('xdebug_execute')
+		edit = output.begin_edit()
+		output.erase( edit, sublime.Region(0, output.size()) )
+		output.insert( edit, 0, res.toprettyxml() )
+		output.end_edit(edit)
+		window.run_command('show_panel', {"panel" :'output.xdebug_execute'})
+
+	def on_change(self, line):
+		pass
+	def on_cancel(self):
+		pass
 
 class EventListener(sublime_plugin.EventListener):
 	def on_load(self, view):
