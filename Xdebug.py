@@ -254,6 +254,10 @@ class XdebugCommand(sublime_plugin.TextCommand):
 					'xdebug_status'		: 'Status',
 					'xdebug_execute'	: 'Execute',
 				})
+				if xdebug_stack_view:
+					mapping['xdebug_stack_get'] = 'Stack Trace'
+				else:
+					mapping['xdebug_stack_setup'] = 'Stack Trace'
 		else:
 			mapping['xdebug_listen'] = 'Listen'
 		def callback(index):
@@ -393,6 +397,34 @@ class XdebugExecute(sublime_plugin.TextCommand):
 	def on_cancel(self):
 		pass
 
+class XdebugStackGet(sublime_plugin.TextCommand):
+	def run(self, edit):
+		view = lookup_view( self.view )
+		protocol.send('stack_get')
+		res = protocol.read().firstChild
+		view.set_read_only(False)
+		for stack in res.childNodes:
+			get = stack.getAttribute
+			fname = get('filename').split('://', 1)[1]
+			view.append('%s:%s %s' % (fname, get('lineno'), get('where')), edit)
+		view.set_read_only(True)
+	def is_enabled(self):
+		return self.view.name()=='Stack Trace'
+
+class XdebugStackSetup(sublime_plugin.TextCommand):
+	def run(self, edit):
+		global xdebug_stack_view
+		v = self.view.window().new_file()
+		v.set_scratch(True)
+		v.set_read_only(True)
+		v.set_name('Stack Trace')
+		xdebug_stack_view = lookup_view(v)
+		v.run_command('xdebug_stack_get')
+	def is_enabled(self):
+		if xdebug_stack_view:
+			return False
+		return True
+
 class EventListener(sublime_plugin.EventListener):
 	def on_load(self, view):
 		if xdebug_current and not xdebug_current.is_loading():
@@ -423,6 +455,7 @@ def show_file( window, uri):
 		return dbg_view
 
 xdebug_current = None
+xdebug_stack_view = None
 xdebug_current_line = None
 def debug_line():
 	if xdebug_current and xdebug_current.is_loading(): return
