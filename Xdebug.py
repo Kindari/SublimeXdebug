@@ -254,10 +254,8 @@ class XdebugCommand(sublime_plugin.TextCommand):
 					'xdebug_status'		: 'Status',
 					'xdebug_execute'	: 'Execute',
 				})
-				if xdebug_stack_view:
-					mapping['xdebug_stack_get'] = 'Stack Trace'
-				else:
-					mapping['xdebug_stack_setup'] = 'Stack Trace'
+				mapping[xdebug_stack_view and 'xdebug_stack_get'
+					or 'xdebug_stack_setup'] = 'Stack Trace'
 		else:
 			mapping['xdebug_listen'] = 'Listen'
 		def callback(index):
