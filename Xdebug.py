@@ -34,7 +34,6 @@ class Protocol(object):
 		self.connected = False
 		self.listening = False
 		self.server = None
-		self.contexts = ContextManager()
 		del self.transaction_id
 		try:
 			self.sock.close()
@@ -124,53 +123,6 @@ class Protocol(object):
 		except:
 			pass
 		return self.sock
-
-class ContextManager(object):
-	def __init__(self):
-		self.contexts = {}
-	def update(self):
-		if protocol.connected:
-			protocol.send('context_names')
-			res = protocol.read().firstChild
-			for child in res.childNodes:
-				name = child.getAttribute('name')
-				id = child.getAttribute('id')
-				if not id in self.contexts:
-					self.contexts[id] = Context(id, name, self)
-
-
-class Context(object):
-	def __init__(self, id, name, manager):
-		self.id = id
-		self.name = name
-		self.manager = manager
-		self.properties = []
-		self.get()
-		print self.properties
-	def get(self):
-		protocol.send('context_get', c=self.id)
-		res = protocol.read().firstChild
-		for child in res.childNodes:
-			prop = Property(child, self)
-			self.properties.append(prop)
-
-class Property(object):
-	def __init__(self, res, parent = None):
-		self.raw = res
-		self.parent = parent
-		self.children = []
-		self.attributes = {}
-		if res.attributes:
-			for key, value in res.attributes.items():
-				self.attributes[key] = value
-		for child in res.childNodes:
-			self.children.append( Property(child, self) )
-	def __repr__(self):
-		attr = self.attributes
-		if attr['type']=='array':
-			return "%s (%d)[...]" % ( attr['name'], attr['numchildren'] )
-		return 'UnImplemented'
-
 
 protocol = None
 
