@@ -28,10 +28,5 @@ Debugger control menu:
 In ubuntu you might need to do:
 
     $ sudo apt-get install python2.6
-
-and in the Sublime Text 2 console:
-
-    import sys
-    sys.path.append("/usr/lib/pythin2.6/lib-dynload")
-
+    $ ln -s /usr/lib/python2.6 [Sublime Text dir]/lib/
 
