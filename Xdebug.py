@@ -129,6 +129,7 @@ protocol = None
 class XdebugView(object):
 	def __init__(self, view):
 		self.view = view
+		self.current_line = None
 		self.breaks = { } # line : meta { id: bleh } 
 	def __getattr__(self, attr):
 		if hasattr(self.view, attr):
@@ -197,8 +198,17 @@ class XdebugView(object):
 			self.view.end_edit(edit)
 		return edit
 	def on_load(self):
-		if xdebug_current==self:
-			debug_line()
+		if self.current_line:
+			self.current( self.current_line )
+			self.current_line = None
+	def current(self, line):
+		if self.is_loading():
+			self.current_line = line
+			return
+		region = self.lines( line )
+		self.add_regions( 'xdebug_current_line', region, 
+			'xdebug.current_line', 'circle', sublime.HIDDEN)
+		self.center( line )
 
 class XdebugCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -281,7 +291,7 @@ class XdebugContinueCommand(sublime_plugin.TextCommand):
 		if type(state)==int:
 			state = self.states.keys()[state]
 		
-		global xdebug_current, xdebug_current_line
+		global xdebug_current
 		reset_current()
 
 		protocol.send( state )
@@ -290,9 +300,8 @@ class XdebugContinueCommand(sublime_plugin.TextCommand):
 
 		for child in res.childNodes:
 			if child.nodeName=='xdebug:message':
-				xdebug_current_line = int(child.getAttribute('lineno'))
 				xdebug_current = show_file(self.view.window(), child.getAttribute('filename') )
-				debug_line()
+				xdebug_current.current( int(child.getAttribute('lineno')) )
 
 	def is_enabled(self):
 		if protocol and protocol.connected:
@@ -304,6 +313,7 @@ class XdebugClearCommand(sublime_plugin.TextCommand):
 		global protocol
 		try:
 			protocol.clear()
+			reset_current()
 		except:
 			pass
 		finally:
@@ -416,17 +426,9 @@ def show_file( window, uri):
 
 xdebug_current = None
 xdebug_stack_view = None
-xdebug_current_line = None
-def debug_line():
-	if xdebug_current and not xdebug_current.is_loading() and xdebug_current_line:
-		region = xdebug_current.lines(xdebug_current_line)
-		xdebug_current.add_regions( 'xdebug_current_line', region, 
-			'xdebug.current_line', 'circle', sublime.HIDDEN)
-		xdebug_current.center( xdebug_current_line )
 
 def reset_current():
-	global xdebug_current, xdebug_current_line
+	global xdebug_current
 	if xdebug_current:
 		xdebug_current.erase_regions('xdebug_current_line')
 		xdebug_current = None
-		xdebug_current_line = None
