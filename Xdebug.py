@@ -133,7 +133,10 @@ class XdebugView(object):
 	def __getattr__(self, attr):
 		if hasattr(self.view, attr):
 			return getattr(self.view, attr)
+		if attr.startswith('on_'):
+			return self
 		raise AttributeError, "%s does not exist" % attr
+	def __call__(self, *args, **kwargs): pass
 	def center(self, lineno):
 		line = self.lines(lineno)[ 0 ]
 		self.view.show_at_center( line )
@@ -155,6 +158,7 @@ class XdebugView(object):
 		self.view.add_regions('dbgp_breakpoints',
 			self.lines(self.breaks.keys()), 'dbgp.breakpoint', 'bookmark', sublime.HIDDEN)
 	def breakpoint_init(self):
+		if not self.breaks: return
 		uri = self.uri()
 		for row in self.breaks:
 			protocol.send('breakpoint_set', t='line', f=uri, n=row)
@@ -192,6 +196,9 @@ class XdebugView(object):
 		if end:
 			self.view.end_edit(edit)
 		return edit
+	def on_load(self):
+		if xdebug_current==self:
+			debug_line()
 
 class XdebugCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -375,9 +382,18 @@ class XdebugStackSetup(sublime_plugin.TextCommand):
 		return True
 
 class EventListener(sublime_plugin.EventListener):
-	def on_load(self, view):
-		if xdebug_current and xdebug_current.buffer_id()==view.buffer_id():
-			debug_line()
+	def on_new(self, view): lookup_view(view).on_new()
+	def on_clone(self, view): lookup_view(view).on_clone()
+	def on_load(self, view): lookup_view(view).on_load()
+	def on_close(self, view): lookup_view(view).on_close()
+	def on_pre_save(self, view): lookup_view(view).on_pre_save()
+	def on_post_save(self, view): lookup_view(view).on_post_save()
+	def on_modified(self, view): lookup_view(view).on_modified()
+	def on_selection_modified(self, view): lookup_view(view).on_selection_modified()
+	def on_activated(self, view): lookup_view(view).on_activated()
+	def on_deactivated(self, view): lookup_view(view).on_deactivated()
+	def on_query_context(self, view, key, operator, operand, match_all):
+		lookup_view(view).on_query_context(key, operator, operand, match_all)
 
 
 buffers = {}
