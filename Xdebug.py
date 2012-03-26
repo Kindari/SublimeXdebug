@@ -237,7 +237,7 @@ class XdebugListenCommand(sublime_plugin.TextCommand):
 		uri = init.getAttribute('fileuri')
 		show_file(self.view.window(), uri)
 
-		for view in dbgviews.values():
+		for view in buffers.values():
 			view.breakpoint_init()
 
 	def is_enabled(self):
@@ -285,7 +285,6 @@ class XdebugContinueCommand(sublime_plugin.TextCommand):
 			if child.nodeName=='xdebug:message':
 				xdebug_current_line = int(child.getAttribute('lineno'))
 				xdebug_current = show_file(self.view.window(), child.getAttribute('filename') )
-				print 'current', xdebug_current
 				debug_line()
 
 	def is_enabled(self):
@@ -377,42 +376,37 @@ class XdebugStackSetup(sublime_plugin.TextCommand):
 
 class EventListener(sublime_plugin.EventListener):
 	def on_load(self, view):
-		if xdebug_current and not xdebug_current.is_loading():
+		if xdebug_current and xdebug_current.buffer_id()==view.buffer_id():
 			debug_line()
-			xdebug_current.center( xdebug_current_line )
 
 
-
-dbgviews = {}
-dbguris = {}
-def lookup_view(view):
-	if not view in dbgviews:
-		dbgviews[view] = XdebugView(view)
-	return dbgviews[view]
-def uri_view(uri):
-	if uri in dbguris:
-		return dbguris[uri]
-	for view in dbgviews.values():
-		if view.file_name()==uri:
-			dbguris[uri] = view
-			return view
+buffers = {}
+def lookup_view(v):
+	if isinstance(v, XdebugView): return v
+	if isinstance(v, sublime.View):
+		id = v.buffer_id()
+		if id in buffers:
+			buffers[id].view = v
+		else:
+			buffers[id] = XdebugView(v)
+		return buffers[id]
+	return None
 
 def show_file( window, uri):
 	transport, filename = uri.split('://', 1)
 	if transport=='file' and os.path.exists(filename):
 		view = window.open_file(filename, sublime.TRANSIENT)
-		dbg_view = lookup_view(view)
-		return dbg_view
+		return lookup_view(view)
 
 xdebug_current = None
 xdebug_stack_view = None
 xdebug_current_line = None
 def debug_line():
-	if xdebug_current and xdebug_current.is_loading(): return
-	if not xdebug_current_line: return 
-	xdebug_current.add_regions( 'xdebug_current_line',
-		xdebug_current.lines(xdebug_current_line), 
-		'xdebug.current_line', 'circle', sublime.HIDDEN)
+	if xdebug_current and not xdebug_current.is_loading() and xdebug_current_line:
+		region = xdebug_current.lines(xdebug_current_line)
+		xdebug_current.add_regions( 'xdebug_current_line', region, 
+			'xdebug.current_line', 'circle', sublime.HIDDEN)
+		xdebug_current.center( xdebug_current_line )
 
 def reset_current():
 	global xdebug_current, xdebug_current_line
