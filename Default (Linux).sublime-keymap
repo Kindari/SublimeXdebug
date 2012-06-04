@@ -1,5 +1,9 @@
 [
-	{"keys": ["super+shift+t"], "command": "xdebug"},
-	{"keys": ["super+shift+b"], "command": "xdebug_breakpoint"},
-	{"keys": ["super+shift+r"], "command": "xdebug_continue" }
+    {"keys": ["shift+f8"], "command": "xdebug" },
+    {"keys": ["f8"], "command": "xdebug_continue" },
+    {"keys": ["ctrl+f8"], "command": "xdebug_breakpoint"},
+	{"keys": ["ctrl+shift+f5"], "command": "xdebug_continue", "args": {"state": "run"}},
+	{"keys": ["ctrl+shift+f6"], "command": "xdebug_continue", "args": {"state": "step_over"}},
+	{"keys": ["ctrl+shift+f7"], "command": "xdebug_continue", "args": {"state": "step_into"}},
+	{"keys": ["ctrl+shift+f8"], "command": "xdebug_continue", "args": {"state": "step_out"}}
 ]
