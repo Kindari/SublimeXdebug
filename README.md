@@ -8,6 +8,8 @@ Simple client to connect with XDebug.
 - Debugging layout for stack and variables
 - Auto-launch web browser for session based debugging (see below)
 
+![Screenshot](https://github.com/jotson/SublimeXdebug/raw/master/doc/images/screenshot.png)
+
 ## Quick start
 
 Use `Shift+f8` to show a list of actions:
