@@ -125,7 +125,6 @@ class Protocol(object):
 
         if serv:
             try:
-                sublime.status_message('Xdebug: Waiting for connection')
                 serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 serv.settimeout(1)
                 serv.bind(('', self.port))
@@ -133,14 +132,11 @@ class Protocol(object):
                 self.listening = True
                 self.sock = None
             except Exception, x:
-                sublime.status_message('Xdebug: Could not initialize port')
                 raise(ProtocolConnectionException, x)
 
             while self.listening:
                 try:
                     self.sock, address = serv.accept()
-                    sublime.status_message('Xdebug: Connected')
-                    #print self.sock, address
                     self.listening = False
                 except socket.timeout:
                     pass
@@ -159,7 +155,7 @@ class Protocol(object):
                 pass
             return self.sock
         else:
-            sublime.status_message('Xdebug: Socket not created')
+            raise ProtocolConnectionException('Could not create socket')
 
 
 class XdebugView(object):
@@ -283,6 +279,7 @@ class XdebugListenCommand(sublime_plugin.TextCommand):
             sublime.set_timeout(self.gui_callback, 0)
 
     def gui_callback(self):
+        sublime.status_message('Xdebug: Connected')
         init = protocol.read().firstChild
         uri = init.getAttribute('fileuri')
         show_file(self.view.window(), uri)
@@ -667,10 +664,10 @@ def add_debug_info(name, data):
     window = sublime.active_window()
 
     if name == 'context':
-        window.focus_group(1)
+        group = 1
         fullName = "Xdebug Context"
     if name == 'stack':
-        window.focus_group(2)
+        group = 2
         fullName = "Xdebug Stack"
 
     for v in window.views():
@@ -687,14 +684,9 @@ def add_debug_info(name, data):
 
     if found:
         v.set_read_only(False)
+        window.set_view_index(v, group, 0)
         edit = v.begin_edit()
-        regions = v.find_all('.*\n')
-        regions.reverse()
-        for r in regions:
-            v.erase(edit, r)
-        v.end_edit(edit)
-
-        edit = v.begin_edit()
+        v.erase(edit, sublime.Region(0, v.size()))
         v.insert(edit, 0, data)
         v.end_edit(edit)
         v.set_read_only(True)
