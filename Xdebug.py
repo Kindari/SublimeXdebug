@@ -603,7 +603,10 @@ def show_file(window, uri):
     '''
     if window:
         window.focus_group(0)
-    transport, filename = uri.split('://', 1)
+    if sublime.platform() == 'windows':
+        transport, filename = uri.split(':///', 1)  # scheme:///C:/path/file => scheme, C:/path/file
+    else:
+        transport, filename = uri.split('://', 1)  # scheme:///path/file => scheme, /path/file
     if transport == 'file' and os.path.exists(filename):
         window = sublime.active_window()
         views = window.views()
@@ -680,6 +683,7 @@ def add_debug_info(name, data):
         v.set_scratch(True)
         v.set_read_only(True)
         v.set_name(fullName)
+        v.settings().set('word_wrap', False)
         found = True
 
     if found:
