@@ -160,13 +160,14 @@ class Protocol(object):
 
 class XdebugView(object):
     '''
-    The XdebugView is just a normal view with some convenience methods.
+    The XdebugView is sort of a normal view with some convenience methods.
 
     See lookup_view.
     '''
     def __init__(self, view):
         self.view = view
         self.current_line = None
+        self.context_data = {}
         self.breaks = {}  # line : meta { id: bleh }
 
     def __getattr__(self, attr):
@@ -254,6 +255,9 @@ class XdebugView(object):
             self.current(self.current_line)
             self.current_line = None
 
+    def on_close(self, view):
+        del buffers[view.buffer_id]
+
     def current(self, line):
         if self.is_loading():
             self.current_line = line
@@ -261,6 +265,41 @@ class XdebugView(object):
         region = self.lines(line)
         self.add_regions('xdebug_current_line', region, 'xdebug.current_line', 'bookmark', sublime.HIDDEN)
         self.center(line)
+
+    def add_context_data(self, propName, propType, propData):
+        '''
+        Store context data
+        '''
+        self.context_data[propName] = {'type': propType, 'data': propData}
+
+    def on_selection_modified(self):
+        '''
+        Show selected variable in an output panel when clicked
+        '''
+        if protocol and protocol.connected and self.context_data:
+            data = ''
+            point = self.view.sel()[0].a
+            var_name = self.view.substr(self.view.word(point))
+            if not var_name.startswith('$'):
+                var_name = '$' + var_name
+            is_variable = sublime.score_selector(self.view.scope_name(point), 'variable')
+
+            if is_variable and var_name in self.context_data:
+                kind = self.context_data[var_name]['type']
+                if kind == 'array' or kind == 'object':
+                    for key in sorted(self.context_data.keys()):
+                        if key.startswith(var_name):
+                            data += '{k} ({t}) = {d}\n'.format(k=key, t=self.context_data[key]['type'], d=self.context_data[key]['data'])
+                else:
+                    data += '{k} ({t}) = {d}\n'.format(k=var_name, t=kind, d=self.context_data[var_name]['data'])
+
+            window = self.view.window()
+            output = window.get_output_panel('xdebug_inspect')
+            edit = output.begin_edit()
+            output.erase(edit, sublime.Region(0, output.size()))
+            output.insert(edit, 0, data)
+            output.end_edit(edit)
+            window.run_command('show_panel', {"panel": 'output.xdebug_inspect'})
 
 
 class XdebugListenCommand(sublime_plugin.TextCommand):
@@ -376,6 +415,7 @@ class XdebugCommand(sublime_plugin.TextCommand):
             else:
                 sublime.status_message('Xdebug: No URL defined in project settings file.')
             window = sublime.active_window()
+            window.run_command('hide_panel', {"panel": 'output.xdebug_inspect'})
             window.set_layout(original_layout)
 
 
@@ -441,6 +481,8 @@ class XdebugContinueCommand(sublime_plugin.TextCommand):
                                 propValue = unicode('*****')
                             result = result + unicode(propName + ' [' + propType + '] = ' + str(propValue) + '\n')
                             result = result + getValues(child)
+                            if xdebug_current:
+                                xdebug_current.add_context_data(propName, propType, propValue)
                 return result
 
             result = getValues(res)

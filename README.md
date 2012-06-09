@@ -6,6 +6,7 @@ Simple client to connect with XDebug.
 
 - Automatically display scope variables and stack trace
 - Debugging layout for stack and variables
+- Click variable to inspect value
 - Auto-launch web browser for session based debugging (see below)
 
 ![Screenshot](https://github.com/jotson/SublimeXdebug/raw/master/doc/images/screenshot.png)
