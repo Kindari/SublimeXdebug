@@ -255,9 +255,6 @@ class XdebugView(object):
             self.current(self.current_line)
             self.current_line = None
 
-    def on_close(self, view):
-        del buffers[view.buffer_id]
-
     def current(self, line):
         if self.is_loading():
             self.current_line = line
@@ -294,12 +291,13 @@ class XdebugView(object):
                     data += '{k} ({t}) = {d}\n'.format(k=var_name, t=kind, d=self.context_data[var_name]['data'])
 
             window = self.view.window()
-            output = window.get_output_panel('xdebug_inspect')
-            edit = output.begin_edit()
-            output.erase(edit, sublime.Region(0, output.size()))
-            output.insert(edit, 0, data)
-            output.end_edit(edit)
-            window.run_command('show_panel', {"panel": 'output.xdebug_inspect'})
+            if window:
+                output = window.get_output_panel('xdebug_inspect')
+                edit = output.begin_edit()
+                output.erase(edit, sublime.Region(0, output.size()))
+                output.insert(edit, 0, data)
+                output.end_edit(edit)
+                window.run_command('show_panel', {"panel": 'output.xdebug_inspect'})
 
 
 class XdebugListenCommand(sublime_plugin.TextCommand):
@@ -487,6 +485,8 @@ class XdebugContinueCommand(sublime_plugin.TextCommand):
 
             result = getValues(res)
             add_debug_info('context', result)
+            if xdebug_current:
+                xdebug_current.on_selection_modified()
 
             protocol.send('stack_get')
             res = protocol.read().firstChild
