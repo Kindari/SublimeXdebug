@@ -319,7 +319,7 @@ class XdebugListenCommand(sublime_plugin.TextCommand):
         sublime.status_message('Xdebug: Connected')
         init = protocol.read().firstChild
         uri = init.getAttribute('fileuri')
-        show_file(self.view.window(), uri)
+        #show_file(self.view.window(), uri)
 
         for view in buffers.values():
             view.breakpoint_init()
