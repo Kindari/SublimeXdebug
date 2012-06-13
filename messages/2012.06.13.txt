@@ -9,7 +9,7 @@ contained in the "settings" key within the .sublime-project file. For example:
         [
             {
                 "path": "..."
-            },
+            }
         ],
 
         "settings": {
