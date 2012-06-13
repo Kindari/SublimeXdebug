@@ -49,9 +49,18 @@ XDebug actions:
 
 This plugin can initiate and terminate a debugging session by launching your default web browser with the XDEBUG_SESSION_START or XDEBUG_SESSION_STOP parameters. The debug URL is defined in your .sublime-project file like this:
 	
-	…
-	"xdebug": { "url": "http://your.server.here" }
-	…
+	{
+		"folders":
+		[
+			{
+				"path": "..."
+			},
+		],
+
+		"settings": {
+			"xdebug": { "url": "http://your.web.server" }
+		}
+	}
 
 If you don't configure the URL, the plugin will still listen for debugging connections from XDebug, but you will need to trigger XDebug <a href="http://XDebug.org/docs/remote">some other way</a>.
 

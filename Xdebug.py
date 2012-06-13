@@ -684,18 +684,17 @@ def get_setting(key):
     Xdebug project settings are stored in the sublime project file
     as a dictionary:
 
-        "xdebug": { "key": "value", ... }
+        "settings":
+        {
+            "xdebug": { "key": "value", ... }
+        }
     '''
     try:
-        for folder in sublime.active_window().folders():
-            files = os.listdir(folder)
-            for f in files:
-                if f.endswith('sublime-project'):
-                    with open(os.path.join(folder, f), 'r') as settings_file:
-                        settings = json.load(settings_file)
-                        if 'xdebug' in settings:
-                            if key in settings['xdebug']:
-                                return settings['xdebug'][key]
+        s = sublime.active_window().active_view().settings()
+        xdebug = s.get('xdebug')
+        if xdebug:
+            if key in xdebug:
+                return xdebug[key]
     except:
         pass
 

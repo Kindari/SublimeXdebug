@@ -1,0 +1,21 @@
+Xdebug 2012.06.13 Changelog
+===========================
+
+The project settings format has changed. The xdebug key should now be
+contained in the "settings" key within the .sublime-project file. For example:
+
+    {
+        "folders":
+        [
+            {
+                "path": "..."
+            },
+        ],
+
+        "settings": {
+            "xdebug": { "url": "http://..." }
+        }
+    }
+
+With this change, .sublime-project files no longer need to be in the root
+folder of your project.
