@@ -64,6 +64,10 @@ This plugin can initiate and terminate a debugging session by launching your def
 
 If you don't configure the URL, the plugin will still listen for debugging connections from XDebug, but you will need to trigger XDebug <a href="http://XDebug.org/docs/remote">some other way</a>.
 
+## Gutter icon color
+
+You can change the color of the gutter icons by adding the following scopes to your theme file: xdebug.breakpoint, xdebug.current. Icons from [Font Awesome](http://fortawesome.github.com/Font-Awesome/).
+
 ## Installing XDebug
 
 Of course, SublimeXDebug won't do anything if you don't install and configure XDebug first.

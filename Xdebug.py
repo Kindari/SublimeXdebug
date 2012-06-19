@@ -15,6 +15,9 @@ original_layout = None
 debug_view = None
 protocol = None
 buffers = {}
+breakpoint_icon = '../Xdebug/icons/breakpoint'
+current_icon = '../Xdebug/icons/current'
+current_breakpoint_icon = '../Xdebug/icons/current_breakpoint'
 
 
 class DebuggerException(Exception):
@@ -199,7 +202,7 @@ class XdebugView(object):
             del self.breaks[row]
 
     def view_breakpoints(self):
-        self.view.add_regions('dbgp_breakpoints', self.lines(self.breaks.keys()), 'dbgp.breakpoint', 'dot', sublime.HIDDEN)
+        self.view.add_regions('xdebug_breakpoint', self.lines(self.breaks.keys()), get_setting('breakpoint_scope'), breakpoint_icon, sublime.HIDDEN)
 
     def breakpoint_init(self):
         if not self.breaks:
@@ -260,7 +263,12 @@ class XdebugView(object):
             self.current_line = line
             return
         region = self.lines(line)
-        self.add_regions('xdebug_current_line', region, 'xdebug.current_line', 'bookmark', sublime.HIDDEN)
+        icon = current_icon
+
+        if line in self.breaks.keys():
+            icon = current_breakpoint_icon
+
+        self.add_regions('xdebug_current_line', region, get_setting('current_line_scope'), icon, sublime.HIDDEN)
         self.center(line)
 
     def add_context_data(self, propName, propType, propData):
@@ -389,7 +397,7 @@ class XdebugCommand(sublime_plugin.TextCommand):
         self.view.run_command(command)
 
         if protocol and command == 'xdebug_listen':
-            url = get_setting('url')
+            url = get_project_setting('url')
             if url:
                 webbrowser.open(url + '?XDEBUG_SESSION_START=sublime.xdebug')
             else:
@@ -407,7 +415,7 @@ class XdebugCommand(sublime_plugin.TextCommand):
             })
 
         if command == 'xdebug_clear':
-            url = get_setting('url')
+            url = get_project_setting('url')
             if url:
                 webbrowser.open(url + '?XDEBUG_SESSION_STOP=sublime.xdebug')
             else:
@@ -677,9 +685,9 @@ def reset_current():
         xdebug_current = None
 
 
-def get_setting(key):
+def get_project_setting(key):
     '''
-    Get an xdebug project setting.
+    Get a project setting.
 
     Xdebug project settings are stored in the sublime project file
     as a dictionary:
@@ -697,6 +705,15 @@ def get_setting(key):
                 return xdebug[key]
     except:
         pass
+
+
+def get_setting(key):
+    '''
+    Get Xdebug setting
+    '''
+    s = sublime.load_settings("Xdebug.sublime-settings")
+    if s and s.has(key):
+        return s.get(key)
 
 
 def add_debug_info(name, data):
