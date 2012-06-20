@@ -1,4 +1,5 @@
 {
     "breakpoint_scope": "xdebug.breakpoint",
-    "current_line_scope": "xdebug.current"
+    "current_line_scope": "xdebug.current",
+    "port": 9000
 }
