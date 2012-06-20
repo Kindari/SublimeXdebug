@@ -38,9 +38,10 @@ class Protocol(object):
     '''
 
     read_rate = 1024
-    port = get_project_setting('port') or get_setting('port') or 9000
+    port = 9000
 
     def __init__(self):
+        self.port = get_project_setting('port') or get_setting('port') or self.port
         self.clear()
 
     def clear(self):
