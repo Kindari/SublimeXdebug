@@ -9,7 +9,7 @@ Simple client to connect with XDebug.
 - Click variable to inspect value
 - Auto-launch web browser for session based debugging (see below)
 
-![Screenshot](https://github.com/jotson/SublimeXdebug/raw/master/doc/images/screenshot.png)
+![Screenshot](https://github.com/Kindari/SublimeXdebug/raw/master/doc/images/screenshot.png)
 
 ## Quick start
 
