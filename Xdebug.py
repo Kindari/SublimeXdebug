@@ -76,12 +76,10 @@ class Protocol(object):
 
     def read_until_null(self):
         if self.connected:
-            if '\x00' in self.buffer:
-                data, self.buffer = self.buffer.split('\x00', 1)
-                return data
-            else:
+            while not '\x00' in self.buffer:
                 self.buffer += self.sock.recv(self.read_rate)
-                return self.read_until_null()
+            data, self.buffer = self.buffer.split('\x00', 1)
+            return data
         else:
             raise(ProtocolConnectionException, "Not Connected")
 
