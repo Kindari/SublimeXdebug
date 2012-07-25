@@ -62,7 +62,7 @@ This plugin can initiate and terminate a debugging session by launching your def
 		}
 	}
 
-If you don't configure the URL, the plugin will still listen for debugging connections from XDebug, but you will need to trigger XDebug <a href="http://XDebug.org/docs/remote">some other way</a>.
+If you don't configure the URL, the plugin will still listen for debugging connections from XDebug, but you will need to trigger XDebug <a href="http://XDebug.org/docs/remote">for a remote session</a>. The IDE Key should be "sublime.xdebug".
 
 ## Gutter icon color
 
