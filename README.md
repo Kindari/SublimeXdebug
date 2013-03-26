@@ -70,9 +70,7 @@ You can change the color of the gutter icons by adding the following scopes to y
 
 ## Installing XDebug
 
-Of course, SublimeXDebug won't do anything if you don't install and configure XDebug first.
-
-	<a href="http://xdebug.org/docs/install">Installation instructions</a>
+Of course, SublimeXDebug won't do anything if you don't <a href="http://xdebug.org/docs/install">install and configure XDebug first</a>.
 
 Here's how I setup XDebug on Ubuntu 12.04:
 
